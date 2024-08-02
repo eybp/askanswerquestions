@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question Submission</title>
+    <style>
+        body {
+            background-color: #323232;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+        }
+        .question-form {
+            margin: 20px 0;
+        }
+        .question-list {
+            margin-top: 30px;
+        }
+        .question-item {
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Submit Your Question</h1>
+        <form id="questionForm">
+            <textarea name="question" rows="5" placeholder="Enter your question here..."></textarea><br>
+            <input type="submit" value="Ask Question">
+        </form>
+        
+        <div class="question-list" id="questionList">
+        </div>
+    </div>
+    <script>
+        document.getElementById('questionForm').onsubmit = async function(event) {
+            event.preventDefault();
+            let formData = new FormData(this);
+            try {
+                let response = await fetch('/submit_question', {
+                    method: 'POST',
+                    body: formData
+                });
+                let result = await response.json();
+                if (result.success) {
+                    console.log('Question submitted successfully');
+                    displayQuestions();
+                } else {
+                    console.error('Failed to submit question');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        };
+    
+        async function displayQuestions() {
+            try {
+                let response = await fetch('/fetch_questions');
+                let questions = await response.json();
+                let questionList = document.getElementById('questionList');
+                questionList.innerHTML = '';
+                questions.forEach(q => {
+                    let questionItem = document.createElement('div');
+                    questionItem.classList.add('question-item');
+                    questionItem.innerHTML = `
+                        <strong>Question:</strong> ${q.question}<br>
+                        <strong>Answer:</strong> ${q.answer}
+                    `;
+                    questionList.appendChild(questionItem);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    
+        displayQuestions();
+    </script>    
+</body>
+</html>
